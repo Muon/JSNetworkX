@@ -584,11 +584,16 @@ jsnx.drawing.jsnx_d3.add_nodes_ = function(G, nodes, force, selection,
       data,
       jsnx.drawing.jsnx_d3.node_key_function
     ));
+
+    var drag = force.drag().on("dragstart", function(d) {
+        d3.event.sourceEvent.stopPropagation();
+    });
+
     // create new elements
     var nsel = selection.enter()
         .append('g')
         .classed('node', true)
-        .call(force.drag);
+        .call(drag);
 
     nsel.append(node_shape).classed('node-shape', true);
 

@@ -72,7 +72,9 @@ var d3 = {
     "format": function () {},
     "formatPrefix": function () {},
     "ease": function () {},
-    "event": function () {},
+    "event": {
+    	"sourceEvent": function() {}
+    },
     "transform": function () {},
     "interpolate": function () {},
     "interpolateNumber": function () {},
