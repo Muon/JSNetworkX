@@ -382,6 +382,12 @@ jsnx.drawing.jsnx_d3.draw = function(G, config, opt_bind) {
           };
         }
         var label_offset = config_['edge_label_offset'];
+        var edge_len = config_['edge_len'];
+        if (!goog.isFunction(edge_len)) {
+          edge_len = function() {
+            return config_['edge_len'];
+          };
+        }
 
     if(directed) { // don't rotate labels and draw curvy lines
         update_edge_position = function() {
@@ -393,7 +399,7 @@ jsnx.drawing.jsnx_d3.draw = function(G, config, opt_bind) {
                     y2 = d['target']['y'],
                     angle =  goog.math.angle(x1,y1,x2,y2),
                     dx = Math.sqrt(Math.pow(x2 - x1, 2) +
-                                   Math.pow(y2 - y1, 2)),
+                                   Math.pow(y2 - y1, 2)) * edge_len(d),
                     offset_ = offset(d),
                     shift = strw(d) * inv_scale,
                     scale = 1/inv_scale;
@@ -445,7 +451,7 @@ jsnx.drawing.jsnx_d3.draw = function(G, config, opt_bind) {
                     y2 = d['target']['y'],
                     angle =  goog.math.angle(x1,y1,x2,y2),
                     dx = Math.sqrt(Math.pow(x2 - x1, 2) +
-                                   Math.pow(y2 - y1, 2)),
+                                   Math.pow(y2 - y1, 2)) * edge_len(d),
                     center = dx/2,
                     offset_ = offset(d);
 
@@ -1190,6 +1196,7 @@ jsnx.drawing.jsnx_d3.default_config_ = {
         'fill': '#999',
         'cursor': 'pointer'
     },
+    'edge_len': 1,
     'edge_attr': {},
     'edge_style': {
         'fill': '#000',
