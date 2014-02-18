@@ -161,7 +161,7 @@ jsnx.drawing.jsnx_d3.draw = function(G, config, opt_bind) {
                         .append('g')
                         .classed('nodes', true)
                         .selectAll('g.node'),
-        force = d3.layout.force(),
+        force = (config_['layout'] || d3.layout.force)(),
         width = config_['width'] || parseInt(container.style('width'), 10),
         height = config_['height'] || parseInt(container.style('height'), 10),
         layout_attr = config_['layout_attr'],
@@ -290,7 +290,7 @@ jsnx.drawing.jsnx_d3.draw = function(G, config, opt_bind) {
     var exclude = {'size': true, 'nodes': true, 'links': true, 'start': true};
 
     jsnx.helper.forEach(layout_attr, function(attr) {
-        if(!goog.object.containsKey(exclude, attr)) {
+        if(!goog.object.containsKey(exclude, attr) && goog.isFunction(force[attr])) {
             force[attr](layout_attr[attr]);
         }
     });
