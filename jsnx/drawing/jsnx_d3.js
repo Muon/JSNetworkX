@@ -386,29 +386,47 @@ jsnx.drawing.jsnx_d3.draw = function(G, config, opt_bind) {
     if(directed) { // don't rotate labels and draw curvy lines
         update_edge_position = function() {
             selections.edge_selection.each(function(d) {
-                if(d['source'] !== d['target']) {
-                    var $this = d3.select(this),
-                        x1 = d['source']['x'],
-                        y1 = d['source']['y'],
-                        x2 = d['target']['x'],
-                        y2 = d['target']['y'],
-                        angle =  goog.math.angle(x1,y1,x2,y2),
-                        dx = Math.sqrt(Math.pow(x2 - x1, 2) +
+                var $this = d3.select(this),
+                    x1 = d['source']['x'],
+                    y1 = d['source']['y'],
+                    x2 = d['target']['x'],
+                    y2 = d['target']['y'],
+                    angle =  goog.math.angle(x1,y1,x2,y2),
+                    dx = Math.sqrt(Math.pow(x2 - x1, 2) +
                                    Math.pow(y2 - y1, 2)),
-                        offset_ = offset(d);
+                    offset_ = offset(d),
+                    shift = strw(d) * inv_scale,
+                    scale = 1/inv_scale;
 
-                    offset_ = [offset_[0] * inv_scale, offset_[1] * inv_scale];
+                offset_ = [offset_[0] * inv_scale, offset_[1] * inv_scale];
 
+                if(d['source'] === d['target']) {
+                    var center = dx/2;
+
+                    var flip = angle > 90 && angle < 279;
+                    $this.attr('transform', ['translate(',x1,',',y1,')', 'rotate(', angle,')'].join(''));
+                    $this.select('.line').attr('d', d3.svg.line().interpolate('bundle')([[0, -offset_[0]/2],  [0 + 20, -offset_[0]/2 - 45], [0 - 20, -offset_[0]/2 - 45], [0, -offset_[0]/2]]));
+                    $this.select('.line')
+                        .style('stroke-width', strw(d) / 2 * inv_scale);
+                    // $this.select('.line').attr('d', ['M', offset_[0], shift/4, 'L', offset_[0], -shift/4, 'L', dx - offset_[1], -shift/4, 'L', dx - offset_[1], shift/4, 'z'].join(' '));
+                    if(config_['with_edge_labels']) {
+                        $this.select('text')
+                        .attr('x',  ((flip ? 1 : -1) * label_offset['x'] * scale) + offset_[0] + (dx*scale - offset_[0] - offset_[1]) / 2)
+                        .attr('y', -strw(d)/4 + -label_offset['y'] * scale + offset_[0]/2 - 45)
+                          .attr('transform', 'scale(' + inv_scale + ')' +
+                              (flip ?
+                              'rotate(180,' +  center * (1/inv_scale) +',0)' : '')
+                          );
+                    }
+                } else {
                     $this.attr('transform', 
                       ['translate(',x1,',',y1,')', 'rotate(', angle,')'].join('')
                     );
 
-                    var shift = strw(d) * inv_scale;
                     var arrow_start_point = dx - offset_[1] - 2*shift;
                     var half_shift = shift/2;
                     $this.select('.line').attr('d', ['M', offset_[0], 0, 'L', offset_[0], -half_shift, 'L', arrow_start_point, -half_shift, 'L', arrow_start_point,  -shift, 'L', dx - offset_[1], 0, 'z'].join(' ')); 
 
-                    var scale = 1/inv_scale;
                     $this.select('text')
                         .attr('x',  (label_offset['x'] * scale) + offset_[0] + (dx*scale - offset_[0] - offset_[1]) / 2)
                         .attr('y', -strw(d)/2 + -label_offset['y'] * scale)
@@ -420,23 +438,39 @@ jsnx.drawing.jsnx_d3.draw = function(G, config, opt_bind) {
     else {
         update_edge_position = function() {
             selections.edge_selection.each(function(d) {
-                if(d['source'] !== d['target']) {
-                    var $this = d3.select(this),
-                        x1 = d['source']['x'],
-                        y1 = d['source']['y'],
-                        x2 = d['target']['x'],
-                        y2 = d['target']['y'],
-                        angle =  goog.math.angle(x1,y1,x2,y2),
-                        dx = Math.sqrt(Math.pow(x2 - x1, 2) +
-                                       Math.pow(y2 - y1, 2)),
-                        center = dx/2,
-                        offset_ = offset(d);
+                var $this = d3.select(this),
+                    x1 = d['source']['x'],
+                    y1 = d['source']['y'],
+                    x2 = d['target']['x'],
+                    y2 = d['target']['y'],
+                    angle =  goog.math.angle(x1,y1,x2,y2),
+                    dx = Math.sqrt(Math.pow(x2 - x1, 2) +
+                                   Math.pow(y2 - y1, 2)),
+                    center = dx/2,
+                    offset_ = offset(d);
 
-                    offset_ = [offset_[0] * inv_scale, offset_[1] * inv_scale];
+                offset_ = [offset_[0] * inv_scale, offset_[1] * inv_scale];
 
-                    var scale = 1/inv_scale;
-                    var shift = strw(d) * inv_scale;
-                    var flip = angle > 90 && angle < 279;
+                var scale = 1/inv_scale;
+                var shift = strw(d) * inv_scale;
+                var flip = angle > 90 && angle < 279;
+
+                if(d['source'] === d['target']) {
+                    $this.attr('transform', ['translate(',x1,',',y1,')', 'rotate(', angle,')'].join(''));
+                    $this.select('.line').attr('d', d3.svg.line().interpolate('bundle')([[0, -offset_[0]/2],  [0 + 20, -offset_[0]/2 - 45], [0 - 20, -offset_[0]/2 - 45], [0, -offset_[0]/2]]));
+                    $this.select('.line')
+                        .style('stroke-width', strw(d) / 2 * inv_scale);
+                    // $this.select('.line').attr('d', ['M', offset_[0], shift/4, 'L', offset_[0], -shift/4, 'L', dx - offset_[1], -shift/4, 'L', dx - offset_[1], shift/4, 'z'].join(' '));
+                    if(config_['with_edge_labels']) {
+                        $this.select('text')
+                        .attr('x',  ((flip ? 1 : -1) * label_offset['x'] * scale) + offset_[0] + (dx*scale - offset_[0] - offset_[1]) / 2)
+                        .attr('y', -strw(d)/4 + -label_offset['y'] * scale + offset_[0]/2 - 45)
+                          .attr('transform', 'scale(' + inv_scale + ')' +
+                              (flip ?
+                              'rotate(180,' +  center * (1/inv_scale) +',0)' : '')
+                          );
+                    }
+                } else {
                     $this.attr('transform', ['translate(',x1,',',y1,')', 'rotate(', angle,')'].join(''));
                     $this.select('.line').attr('d', ['M', offset_[0], shift/4, 'L', offset_[0], -shift/4, 'L', dx - offset_[1], -shift/4, 'L', dx - offset_[1], shift/4, 'z'].join(' ')); 
                     if(config_['with_edge_labels']) {
@@ -713,6 +747,12 @@ jsnx.drawing.jsnx_d3.update_edge_attr_ = function(selection, edge_style,
         }
     });
     edges.style('stroke-width', 0);
+
+    var selfloops = selection.filter(function(d) {
+        return d['source'] === d['target'];
+    }).selectAll('.line');
+    selfloops.style('fill', 'none');
+    selfloops.style('stroke', edge_style.style['fill']);
 
     if(opt_with_edge_labels) {
         var labels = selection.selectAll('text');
